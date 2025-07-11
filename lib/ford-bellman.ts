@@ -172,3 +172,40 @@ export function reconstructPath(
   path.unshift(startNode)
   return path
 }
+
+// Trouve tous les chemins optimaux (de même valeur) du start au end
+export function findAllOptimalPaths(
+  predecessors: Record<string, string | null>,
+  startNode: string,
+  endNode: string,
+): string[][] {
+  const paths: string[][] = [];
+  function backtrack(current: string, path: string[]) {
+    if (current === startNode) {
+      paths.push([startNode, ...path]);
+      return;
+    }
+    // Trouver tous les prédécesseurs possibles (peut être plusieurs si plusieurs arcs mènent à current avec la même valeur optimale)
+    const preds = Object.entries(predecessors)
+      .filter(([node, next]) => next === current)
+      .map(([node]) => node);
+    if (predecessors[current]) {
+      backtrack(predecessors[current]!, [current, ...path]);
+    }
+    // Si plusieurs prédécesseurs, explorer tous
+    for (const pred of preds) {
+      if (pred !== predecessors[current]) {
+        backtrack(pred, [current, ...path]);
+      }
+    }
+  }
+  backtrack(endNode, []);
+  // Supprimer les doublons éventuels
+  const unique = new Set<string>();
+  return paths.filter(p => {
+    const key = p.join(",");
+    if (unique.has(key)) return false;
+    unique.add(key);
+    return true;
+  });
+}

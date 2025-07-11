@@ -11,6 +11,7 @@ interface GraphVisualizerProps {
   startNode: string | null
   endNode: string | null
   path: string[] | null
+  paths?: string[][] // Ajout de la prop pour tous les chemins optimaux
   algorithmResult: any
   currentStep: any
   onUpdateNodePosition: (nodeId: string, x: number, y: number) => void
@@ -23,6 +24,7 @@ export function GraphVisualizer({
   startNode,
   endNode,
   path,
+  paths = [], // valeur par défaut
   algorithmResult,
   currentStep,
   onUpdateNodePosition,
@@ -73,6 +75,14 @@ export function GraphVisualizer({
 
       if (!sourcePos || !targetPos) return
 
+      // Vérifier si l'arête appartient à au moins un chemin optimal
+      const isInAnyPath = Array.isArray(paths) && paths.some(p => {
+        for (let i = 0; i < p.length - 1; i++) {
+          if (p[i] === edge.source && p[i + 1] === edge.target) return true;
+        }
+        return false;
+      });
+
       const isInPath =
         path &&
         path.length > 1 &&
@@ -102,12 +112,11 @@ export function GraphVisualizer({
       ctx.moveTo(startX, startY)
       ctx.lineTo(endX, endY)
 
-
       if (isUpdatedInStep) {
         ctx.strokeStyle = "#ff3300"
         ctx.lineWidth = 3
-      } else if (isInPath) {
-        ctx.strokeStyle = "#00cc00" 
+      } else if (isInAnyPath) {
+        ctx.strokeStyle = "#00cc00" // Vert pour tous les chemins optimaux
         ctx.lineWidth = 3
       } else {
         ctx.strokeStyle = "#666666"
@@ -188,10 +197,10 @@ export function GraphVisualizer({
 
         if (value !== undefined && value !== Number.POSITIVE_INFINITY && value !== Number.NEGATIVE_INFINITY) {
           ctx.font = "12px Arial"
-          ctx.fillStyle = "#000000"
+          ctx.fillStyle = "#d32f2f"
           ctx.textAlign = "center"
           ctx.textBaseline = "middle"
-          ctx.fillText(value.toString(), pos.x, pos.y + 35)
+          ctx.fillText(`λ${node.label.slice(1)} = ${value}`, pos.x, pos.y + 35)
         }
       }
     })

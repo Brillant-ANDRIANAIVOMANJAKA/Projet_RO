@@ -10,7 +10,7 @@ import { GraphVisualizer } from "@/components/graph-visualizer"
 import { AlgorithmSteps } from "@/components/algorithm-steps"
 import { NodeEditor } from "@/components/node-editor"
 import { EdgeEditor } from "@/components/edge-editor"
-import { fordBellmanMinimization, fordBellmanMaximization, reconstructPath } from "@/lib/ford-bellman"
+import { fordBellmanMinimization, fordBellmanMaximization, reconstructPath, findAllOptimalPaths } from "@/lib/ford-bellman"
 import type { Graph } from "@/lib/graph-types"
 
 export default function Home() {
@@ -26,33 +26,6 @@ export default function Home() {
   const [algorithmResult, setAlgorithmResult] = useState<any>(null)
   const [algorithmSteps, setAlgorithmSteps] = useState<any[]>([])
   const [currentStep, setCurrentStep] = useState<number>(0)
-
-  useEffect(() => {
-    const initialGraph: Graph = {
-      nodes: [
-        { id: "x1", label: "x1" },
-        { id: "x2", label: "x2" },
-        { id: "x3", label: "x3" },
-        { id: "x4", label: "x4" },
-        { id: "x5", label: "x5" },
-        { id: "x6", label: "x6" },
-      ],
-      edges: [
-        { id: "e1", source: "x1", target: "x2", weight: 5 },
-        { id: "e2", source: "x1", target: "x3", weight: 3 },
-        { id: "e3", source: "x2", target: "x4", weight: 2 },
-        { id: "e4", source: "x3", target: "x2", weight: 1 },
-        { id: "e5", source: "x3", target: "x4", weight: 6 },
-        { id: "e6", source: "x3", target: "x5", weight: 7 },
-        { id: "e7", source: "x4", target: "x6", weight: 4 },
-        { id: "e8", source: "x5", target: "x6", weight: 2 },
-      ],
-    }
-
-    setGraph(initialGraph)
-    setStartNode("x1")
-    setEndNode("x6")
-  }, [])
 
   const addNode = () => {
     const newId = `x${graph.nodes.length + 1}`
@@ -147,11 +120,10 @@ export default function Home() {
     setCurrentStep(0)
   }
 
-  const getPath = () => {
-    if (!algorithmResult || !startNode || !endNode) return null
-
-    const { predecessors } = algorithmResult
-    return reconstructPath(predecessors, startNode, endNode)
+  const getPaths = () => {
+    if (!algorithmResult || !startNode || !endNode) return [];
+    const { predecessors } = algorithmResult;
+    return findAllOptimalPaths(predecessors, startNode, endNode);
   }
 
   return (
@@ -178,7 +150,8 @@ export default function Home() {
                     onSelectNode={setSelectedNode}
                     startNode={startNode}
                     endNode={endNode}
-                    path={getPath()}
+                    path={getPaths()[0] || null}
+                    paths={getPaths()}
                     algorithmResult={algorithmResult}
                     currentStep={currentStep < algorithmSteps.length ? algorithmSteps[currentStep] : null}
                     onUpdateNodePosition={updateNodePosition}
@@ -200,7 +173,8 @@ export default function Home() {
                 onSelectNode={setSelectedNode}
                 startNode={startNode}
                 endNode={endNode}
-                path={getPath()}
+                path={getPaths()[0] || null}
+                paths={getPaths()}
                 algorithmResult={algorithmResult}
                 currentStep={currentStep < algorithmSteps.length ? algorithmSteps[currentStep] : null}
                 onUpdateNodePosition={updateNodePosition}

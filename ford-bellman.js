@@ -203,6 +203,15 @@ console.log("Shortest path from", largeStartNode, "to", largeEndNode, ":");
 const largePath = reconstructPath(largeResult.predecessors, largeStartNode, largeEndNode);
 console.log(largePath.join(" → "), `(total distance: ${largeResult.distances[largeEndNode]})`);
 
+// === Affichage détaillé façon tableau pour chaque arête ===
+console.log("\n=== Détail des arêtes (λj - λi, v(xi, xj), λj = λi + v(xi, xj)) ===");
+for (const { source, target, weight } of largeGraph.edges) {
+  const lambda_i = largeResult.distances[source];
+  const lambda_j = largeResult.distances[target];
+  const diff = lambda_j - lambda_i;
+  console.log(`i: ${source}, j: ${target} | λ_${target} - λ_${source} = ${lambda_j} - ${lambda_i} = ${diff} | v(${source}, ${target}) = ${weight} | λ_${target} = λ_${source} + v(${source}, ${target}) = ${lambda_i} + ${weight} = ${lambda_j}`);
+}
+
 console.log("\n=== STEP-BY-STEP VISUALIZATION ===");
 
 function visualizeFordBellman(graph, startNode) {
